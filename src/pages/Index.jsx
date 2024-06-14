@@ -3,6 +3,7 @@ import { Link as RouterLink } from "react-router-dom"; // Import RouterLink
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { useEvents, useAddEvent, useUpdateEvent, useDeleteEvent } from "../integrations/supabase/index.js"; // Import Supabase hooks
+import { useSupabaseAuth } from "../integrations/supabase/auth.jsx"; // Import the useSupabaseAuth hook
 
 const Index = () => {
   const { data: events, isLoading, error } = useEvents(); // Use the useEvents hook to fetch events
@@ -10,6 +11,7 @@ const Index = () => {
   const updateEventMutation = useUpdateEvent(); // Use the useUpdateEvent hook to update events
   const deleteEventMutation = useDeleteEvent(); // Use the useDeleteEvent hook to delete events
   const [eventName, setEventName] = useState("");
+  const { session, logout } = useSupabaseAuth(); // Use the useSupabaseAuth hook to get session and logout
 
   const [editingIndex, setEditingIndex] = useState(null);
 
@@ -50,6 +52,14 @@ const Index = () => {
       <VStack spacing={8} width="100%">
         <Heading as="h1" size="2xl" textAlign="center">Events Management App</Heading>
         
+        <Box width="100%" textAlign="right">
+          {session ? (
+            <Button colorScheme="teal" onClick={logout}>Logout</Button>
+          ) : (
+            <Button colorScheme="teal" as={RouterLink} to="/login">Login</Button>
+          )}
+        </Box>
+
         <Box width="100%">
           <Heading as="h2" size="lg" mb={4}>{editingIndex !== null ? "Edit Event" : "Add New Event"}</Heading>
           <FormControl id="event-name" mb={4}>
