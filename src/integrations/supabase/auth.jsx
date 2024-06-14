@@ -16,9 +16,25 @@ export const SupabaseAuthProvider = ({ children }) => {
   );
 }
 
+const checkAdminRole = async (user) => {
+  const { data, error } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', user.id)
+    .single();
+
+  if (error) {
+    console.error('Error checking admin role:', error);
+    return false;
+  }
+
+  return data.role === 'admin';
+};
+
 export const SupabaseAuthProviderInner = ({ children }) => {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -26,12 +42,22 @@ export const SupabaseAuthProviderInner = ({ children }) => {
       setLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
+
+      if (session?.user) {
+        const admin = await checkAdminRole(session.user);
+        setIsAdmin(admin);
+      }
+
       setLoading(false);
     };
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       queryClient.invalidateQueries('user');
+
+      if (session?.user) {
+        checkAdminRole(session.user).then(setIsAdmin);
+      }
     });
 
     getSession();
@@ -45,12 +71,13 @@ export const SupabaseAuthProviderInner = ({ children }) => {
   const logout = async () => {
     await supabase.auth.signOut();
     setSession(null);
+    setIsAdmin(false);
     queryClient.invalidateQueries('user');
     setLoading(false);
   };
 
   return (
-    <SupabaseAuthContext.Provider value={{ session, loading, logout }}>
+    <SupabaseAuthContext.Provider value={{ session, loading, isAdmin, logout }}>
       {children}
     </SupabaseAuthContext.Provider>
   );
