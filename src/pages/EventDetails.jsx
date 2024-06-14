@@ -1,24 +1,17 @@
 import { Container, Heading, Text, Box } from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useEvent } from "../integrations/supabase/index.js"; // Import the useEvent hook
 
 const EventDetails = () => {
   const { id } = useParams();
-  const [event, setEvent] = useState(null);
+  const { data: event, isLoading, error } = useEvent(id); // Use the useEvent hook to fetch event data
 
-  useEffect(() => {
-    // Fetch event details based on the ID
-    // For now, we'll use a placeholder event
-    const fetchedEvent = {
-      id,
-      name: `Event ${id}`,
-      description: `Details of event ${id}`,
-    };
-    setEvent(fetchedEvent);
-  }, [id]);
-
-  if (!event) {
+  if (isLoading) {
     return <Text>Loading...</Text>;
+  }
+
+  if (error) {
+    return <Text>Error loading event details</Text>;
   }
 
   return (

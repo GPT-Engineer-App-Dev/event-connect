@@ -1,10 +1,14 @@
 import { Container, Heading, VStack, Box, FormControl, FormLabel, Input, Button, List, ListItem, Text, IconButton, Link } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom"; // Import RouterLink
 import { FaEdit, FaTrash } from "react-icons/fa";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useEvents, useAddEvent, useUpdateEvent, useDeleteEvent } from "../integrations/supabase/index.js"; // Import Supabase hooks
 
 const Index = () => {
-  const [events, setEvents] = useState([]);
+  const { data: events, isLoading, error } = useEvents(); // Use the useEvents hook to fetch events
+  const addEventMutation = useAddEvent(); // Use the useAddEvent hook to add events
+  const updateEventMutation = useUpdateEvent(); // Use the useUpdateEvent hook to update events
+  const deleteEventMutation = useDeleteEvent(); // Use the useDeleteEvent hook to delete events
   const [eventName, setEventName] = useState("");
 
   const [editingIndex, setEditingIndex] = useState(null);
@@ -14,24 +18,32 @@ const Index = () => {
       if (editingIndex !== null) {
         const updatedEvents = [...events];
         updatedEvents[editingIndex] = eventName;
-        setEvents(updatedEvents);
+        const updatedEvent = { id: events[editingIndex].id, name: eventName };
+        updateEventMutation.mutate(updatedEvent);
         setEditingIndex(null);
       } else {
-        setEvents([...events, eventName]);
+        addEventMutation.mutate({ name: eventName });
       }
       setEventName("");
     }
   };
 
   const editEvent = (index) => {
-    setEventName(events[index]);
+    setEventName(events[index].name);
     setEditingIndex(index);
   };
 
   const deleteEvent = (index) => {
-    const updatedEvents = events.filter((_, i) => i !== index);
-    setEvents(updatedEvents);
+    deleteEventMutation.mutate(events[index].id);
   };
+
+  if (isLoading) {
+    return <Text>Loading...</Text>;
+  }
+
+  if (error) {
+    return <Text>Error loading events</Text>;
+  }
 
   return (
     <Container centerContent maxW="container.md" py={8}>
@@ -51,8 +63,8 @@ const Index = () => {
           <Heading as="h2" size="lg" mb={4}>Event List</Heading>
           <List spacing={3}>
             {events.map((event, index) => (
-              <ListItem key={index} p={2} borderWidth="1px" borderRadius="md" display="flex" justifyContent="space-between" alignItems="center">
-                <Link as={RouterLink} to={`/event/${index}`}><Text>{event}</Text></Link>
+              <ListItem key={event.id} p={2} borderWidth="1px" borderRadius="md" display="flex" justifyContent="space-between" alignItems="center">
+                <Link as={RouterLink} to={`/event/${event.id}`}><Text>{event.name}</Text></Link>
               <Box>
                   <IconButton aria-label="Edit event" icon={<FaEdit />} mr={2} onClick={() => editEvent(index)} />
                   <IconButton aria-label="Delete event" icon={<FaTrash />} onClick={() => deleteEvent(index)} />
