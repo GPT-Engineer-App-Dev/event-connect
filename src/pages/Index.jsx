@@ -1,4 +1,5 @@
-import { Container, Heading, VStack, Box, FormControl, FormLabel, Input, Button, List, ListItem, Text, IconButton } from "@chakra-ui/react";
+import { Container, Heading, VStack, Box, FormControl, FormLabel, Input, Button, List, ListItem, Text, IconButton, Link } from "@chakra-ui/react";
+import { Link as RouterLink } from "react-router-dom"; // Import RouterLink
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { useState } from "react";
 
@@ -51,7 +52,7 @@ const Index = () => {
           <List spacing={3}>
             {events.map((event, index) => (
               <ListItem key={index} p={2} borderWidth="1px" borderRadius="md" display="flex" justifyContent="space-between" alignItems="center">
-                <Text>{event}</Text>
+                <Link as={RouterLink} to={`/event/${index}`}><Text>{event}</Text></Link>
               <Box>
                   <IconButton aria-label="Edit event" icon={<FaEdit />} mr={2} onClick={() => editEvent(index)} />
                   <IconButton aria-label="Delete event" icon={<FaTrash />} onClick={() => deleteEvent(index)} />
