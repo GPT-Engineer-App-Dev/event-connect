@@ -19,102 +19,50 @@ const fromSupabase = async (query) => {
 
 /* supabase integration types
 
-Events // table: events
+Jobs // table: jobs
     id: number
     created_at: string
-    name: string
-    date: string
-    venue_id: number
-    is_starred: boolean
-    private: boolean
-    cancelled: boolean
-
-Comments // table: comments
-    id: number
-    created_at: string
-    content: string
-    event_id: number // foreign key to Events
+    title: string
 
 */
 
-// Hooks for Events table
-export const useEvents = () => useQuery({
-    queryKey: ['events'],
-    queryFn: () => fromSupabase(supabase.from('events').select('*')),
+// Hooks for Jobs table
+export const useJobs = () => useQuery({
+    queryKey: ['jobs'],
+    queryFn: () => fromSupabase(supabase.from('jobs').select('*')),
 });
 
-export const useEvent = (id) => useQuery({
-    queryKey: ['events', id],
-    queryFn: () => fromSupabase(supabase.from('events').select('*').eq('id', id).single()),
+export const useJob = (id) => useQuery({
+    queryKey: ['jobs', id],
+    queryFn: () => fromSupabase(supabase.from('jobs').select('*').eq('id', id).single()),
 });
 
-export const useAddEvent = () => {
+export const useAddJob = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (newEvent) => fromSupabase(supabase.from('events').insert([newEvent])),
+        mutationFn: (newJob) => fromSupabase(supabase.from('jobs').insert([newJob])),
         onSuccess: () => {
-            queryClient.invalidateQueries('events');
+            queryClient.invalidateQueries('jobs');
         },
     });
 };
 
-export const useUpdateEvent = () => {
+export const useUpdateJob = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (updatedEvent) => fromSupabase(supabase.from('events').update(updatedEvent).eq('id', updatedEvent.id)),
+        mutationFn: (updatedJob) => fromSupabase(supabase.from('jobs').update(updatedJob).eq('id', updatedJob.id)),
         onSuccess: () => {
-            queryClient.invalidateQueries('events');
+            queryClient.invalidateQueries('jobs');
         },
     });
 };
 
-export const useDeleteEvent = () => {
+export const useDeleteJob = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (id) => fromSupabase(supabase.from('events').delete().eq('id', id)),
+        mutationFn: (id) => fromSupabase(supabase.from('jobs').delete().eq('id', id)),
         onSuccess: () => {
-            queryClient.invalidateQueries('events');
-        },
-    });
-};
-
-// Hooks for Comments table
-export const useComments = () => useQuery({
-    queryKey: ['comments'],
-    queryFn: () => fromSupabase(supabase.from('comments').select('*')),
-});
-
-export const useComment = (id) => useQuery({
-    queryKey: ['comments', id],
-    queryFn: () => fromSupabase(supabase.from('comments').select('*').eq('id', id).single()),
-});
-
-export const useAddComment = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (newComment) => fromSupabase(supabase.from('comments').insert([newComment])),
-        onSuccess: () => {
-            queryClient.invalidateQueries('comments');
-        },
-    });
-};
-
-export const useUpdateComment = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (updatedComment) => fromSupabase(supabase.from('comments').update(updatedComment).eq('id', updatedComment.id)),
-        onSuccess: () => {
-            queryClient.invalidateQueries('comments');
-        },
-    });
-};
-
-export const useDeleteComment = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (id) => fromSupabase(supabase.from('comments').delete().eq('id', id)),
-        onSuccess: () => {
-            queryClient.invalidateQueries('comments');
+            queryClient.invalidateQueries('jobs');
         },
     });
 };
